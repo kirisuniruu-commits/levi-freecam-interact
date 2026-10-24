@@ -1,0 +1,36 @@
+name: Build Levi Freecam Interact
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download the uploaded files
+        uses: actions/checkout@v4
+
+      - name: Unzip the project
+        run: |
+          unzip -q Levi-Freecam-Interact.zip -d project
+          ls project
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK and build tools
+        run: |
+          sdkmanager "platforms;android-28" "ndk;28.2.13676358"
+          sudo apt-get update
+          sudo apt-get install -y ninja-build zip
+
+      - name: Build arm64-v8a levipack
+        working-directory: project
+        run: bash ./scripts/build.sh
+
+      - name: Upload the finished mod
+        uses: actions/upload-artifact@v4
+        with:
+          name: levi-freecam-interact
+          path: project/dist/arm64-v8a/levi-freecam.levipack
